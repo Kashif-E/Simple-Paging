@@ -15,6 +15,12 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+    
+     jvm("desktop") {
+        compilations.all {
+            kotlinOptions.jvmTarget = "11"
+        }
+    }
 
     cocoapods {
         summary = "Paging"
