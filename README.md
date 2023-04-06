@@ -63,26 +63,19 @@ Replace MyPagingSource with your own implementation of the PagingSource class.
 Sample PagingSource:
 
 ```kotlin
-class SamplePagingSource(private val apiService: ApiService) : PagingSource<Int, Item>() {
-
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Item> {
-        val page = params.key ?: 1
-        val pageSize = params.loadSize
-
+class MyPagingSource(private val database: MyDatabase) : PagingSource<Int, MyData>() {
+    override suspend fun load(params: LoadParams<Int>): Result<Page<Int, MyData>> {
         return try {
-            val response = apiService.getItems(page, pageSize)
-            if (response.isSuccessful) {
-                val items = response.body() ?: emptyList()
-                val nextPage = if (items.isEmpty()) null else page + 1
-                LoadResult.Page(items, prevKey = null, nextKey = nextPage)
-            } else {
-                LoadResult.Error(ApiException(response.code(), response.message()))
-            }
-        } catch (e: Exception) {
-            LoadResult.Error(e)
+            val data = database.loadData(params.key ?: 0, params.loadSize)
+            val prevKey = if (params.key == 0) null else params.key - 1
+            val nextKey = if (data.size < params.loadSize) null else params.key + 1
+            Result.Success(Page(data, prevKey, nextKey))
+        } catch (exception: Exception) {
+            Result.Error(exception.message ?: "Something went wrong, please try again.")
         }
     }
 }
+
 ```
 
 ## License
