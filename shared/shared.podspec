@@ -1,19 +1,19 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'shared'
-    spec.version                  = '0.0.1'
-    spec.homepage                 = ''
+    spec.version                  = '0.0.1-Alpha01'
+    spec.homepage                 = 'https://github.com/Kashif-E/Simple-Paging'
     spec.source                   = { :http=> ''}
     spec.authors                  = ''
     spec.license                  = ''
-    spec.summary                  = 'Paging'
-    spec.vendored_frameworks      = 'build/cocoapods/framework/shared.framework'
+    spec.summary                  = 'Simple Paging'
+    spec.vendored_frameworks      = 'build/cocoapods/framework/simple_paging.framework'
     spec.libraries                = 'c++'
     spec.ios.deployment_target = '14.1'
                 
                 
     spec.pod_target_xcconfig = {
         'KOTLIN_PROJECT_PATH' => ':shared',
-        'PRODUCT_MODULE_NAME' => 'shared',
+        'PRODUCT_MODULE_NAME' => 'simple_paging',
     }
                 
     spec.script_phases = [

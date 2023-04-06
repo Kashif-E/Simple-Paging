@@ -2,6 +2,8 @@ plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
     id("com.android.library")
+    id("maven-publish")
+    id("signing")
 }
 
 kotlin {
@@ -15,27 +17,27 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
-    
-     jvm("desktop") {
+
+    jvm("desktop") {
         compilations.all {
             kotlinOptions.jvmTarget = "11"
         }
     }
 
     cocoapods {
-        summary = "Paging"
-        homepage = ""
-        version = "0.0.1"
+        summary = "Simple Paging"
+        homepage = "https://github.com/Kashif-E/Simple-Paging"
+        version = "0.0.1-Alpha01"
         ios.deploymentTarget = "14.1"
         framework {
-            baseName = "shared"
+            baseName = "simple_paging"
         }
     }
-    
+
     sourceSets {
-        val commonMain by getting{
+        val commonMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0-Beta")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
             }
         }
         val commonTest by getting {
@@ -66,8 +68,74 @@ kotlin {
     }
 }
 
+val javaDocJar = tasks.register("javadocJar", Jar::class.java) {
+    archiveClassifier.set("javadoc")
+}
+
+val repositoryId: String = System.getenv("SONATYPE_REPOSITORY_ID")
+val sonatypeUsername: String = System.getenv("SONATYPE_USERNAME")
+val sonatypePassword: String = System.getenv("SONATYPE_PASSWORD")
+publishing {
+    repositories {
+        maven {
+            name = "oss"
+            val releaseRepoUrl =
+                uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            val snapshotsRepoUrl =
+                uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+            url = if (version.toString()
+                    .endsWith("SNAPSHOT")
+            ) snapshotsRepoUrl else releaseRepoUrl
+            credentials {
+                username = sonatypeUsername
+                password = sonatypePassword
+            }
+        }
+    }
+
+    publications {
+        withType<MavenPublication> {
+            pom {
+                name.set("Simple Paging")
+                description.set("Simple Paging library for Android and iOS using Kotlin Multiplatform")
+                licenses {
+                    license { name.set("MIT") }
+                    url.set("https://opensource.org/licenses/MIT")
+                }
+                url.set("https://www.github.com/Kashif-E/Simple-Paging.git")
+                issueManagement {
+                    system.set("GitHub")
+                    url.set("https://www.github.com/Kashif-E/Simple-Paging/issues")
+                }
+                scm {
+                    connection.set("https://github.com/Kashif-E/Simple-Paging.git")
+                    developerConnection.set("https://github.com/Kashif-E")
+                    url.set("https://github.com/Kashif-E/Simple-Paging")
+                }
+
+                developers {
+                    developer {
+                        id.set("Kashif-E")
+                        name.set("Kashif Mehmood")
+                        email.set("kashismails@gmail.com")
+                    }
+                }
+                artifact(javaDocJar)
+
+                signing{
+                    useInMemoryPgpKeys(
+                        System.getenv("GPG_PUBLIC_KEY"),
+                        System.getenv("GPG_KEY_PASSWORD")
+                    )
+                    sign("simple_paging")
+                }
+            }
+        }
+    }
+}
+
 android {
-    namespace = "com.kashif.paging"
+    namespace = "io.github.kashif-e"
     compileSdk = 33
     defaultConfig {
         minSdk = 24
