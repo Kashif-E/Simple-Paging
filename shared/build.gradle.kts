@@ -29,7 +29,7 @@ kotlin {
     cocoapods {
         summary = "Simple Paging"
         homepage = "https://github.com/Kashif-E/Simple-Paging"
-        version = "0.0.1-Alpha02"
+        version = "0.0.1-Alpha03"
         ios.deploymentTarget = "14.1"
         framework {
             baseName = "simple_paging"
@@ -71,7 +71,7 @@ kotlin {
 }
 
 group = "io.github.kashif-e"
-version = "0.0.1-Alpha02"
+version = "0.0.1-Alpha03"
 
 
 android {

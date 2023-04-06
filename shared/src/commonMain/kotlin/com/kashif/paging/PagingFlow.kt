@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
 /**
  * Paginates the data returned by a [PagingSource].
  *
@@ -21,7 +22,9 @@ import kotlinx.coroutines.launch
 fun <T : Any> CoroutineScope.paginate(
     pagingSourceProvider: () -> PagingSource<Int, T>,
     pagingConfig: PagingConfig = PagingConfig(pageSize = 20),
-    errorHandler: (Throwable) -> String = { exception -> exception.message ?: "Something went wrong, please try again." },
+    errorHandler: (Throwable) -> String = { exception ->
+        exception.message ?: "Something went wrong, please try again."
+    },
     distinctUntilChanged: Boolean = true,
     paginationScope: CoroutineScope = this
 ): PaginationResult<T> {
@@ -35,7 +38,7 @@ fun <T : Any> CoroutineScope.paginate(
 
         paginationScope.launch {
             pagedData.update {
-                if (it is Result.Loading) Result.Loading else Result.PaginationLoading
+                if (currentPage == 1 || currentPage == 0) Result.Loading else Result.PaginationLoading
             }
 
             val loadResult = try {

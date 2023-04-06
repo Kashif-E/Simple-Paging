@@ -75,7 +75,6 @@ class MyPagingSource(private val database: MyDatabase) : PagingSource<Int, MyDat
         }
     }
 }
-
 ```
 
 ## License
