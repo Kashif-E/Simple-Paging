@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'shared'
-    spec.version                  = '0.0.1-Alpha01'
+    spec.version                  = '0.0.1-Alpha02'
     spec.homepage                 = 'https://github.com/Kashif-E/Simple-Paging'
     spec.source                   = { :http=> ''}
     spec.authors                  = ''

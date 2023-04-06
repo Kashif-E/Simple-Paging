@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
@@ -5,7 +7,12 @@ plugins {
     id("maven-publish")
     id("signing")
 }
+val properties = Properties()
+File("local.properties").inputStream().use { properties.load(it) }
 
+repositories {
+    mavenCentral()
+}
 kotlin {
     android {
         compilations.all {
@@ -18,16 +25,11 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
-    jvm("desktop") {
-        compilations.all {
-            kotlinOptions.jvmTarget = "11"
-        }
-    }
 
     cocoapods {
         summary = "Simple Paging"
         homepage = "https://github.com/Kashif-E/Simple-Paging"
-        version = "0.0.1-Alpha01"
+        version = "0.0.1-Alpha02"
         ios.deploymentTarget = "14.1"
         framework {
             baseName = "simple_paging"
@@ -68,6 +70,18 @@ kotlin {
     }
 }
 
+group = "io.github.kashif-e"
+version = "0.0.1-Alpha02"
+
+
+android {
+    namespace = "io.github.kashif-e"
+    compileSdk = 33
+    defaultConfig {
+        minSdk = 24
+        targetSdk = 33
+    }
+}
 val javaDocJar = tasks.register("javadocJar", Jar::class.java) {
     archiveClassifier.set("javadoc")
 }
@@ -77,68 +91,69 @@ val sonatypeUsername: String = System.getenv("SONATYPE_USERNAME")
 val sonatypePassword: String = System.getenv("SONATYPE_PASSWORD")
 publishing {
     repositories {
-        maven {
-            name = "oss"
-            val releaseRepoUrl =
-                uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotsRepoUrl =
-                uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-            url = if (version.toString()
-                    .endsWith("SNAPSHOT")
-            ) snapshotsRepoUrl else releaseRepoUrl
-            credentials {
-                username = sonatypeUsername
-                password = sonatypePassword
+        repositories {
+            maven {
+                name = "oss"
+                val releaseRepoUrl =
+                    uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                val snapshotsRepoUrl =
+                    uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+                url = if (version.toString()
+                        .endsWith("SNAPSHOT")
+                ) snapshotsRepoUrl else releaseRepoUrl
+                credentials {
+                    username = sonatypeUsername
+                    password = sonatypePassword
+                }
             }
         }
     }
 
     publications {
         withType<MavenPublication> {
+            artifact(javaDocJar)
             pom {
                 name.set("Simple Paging")
-                description.set("Simple Paging library for Android and iOS using Kotlin Multiplatform")
+                description.set("A simple paging library for Android and iOS written in Kotlin Multiplatform")
+                url.set("https://www.github.com/Kashif-E/Simple-Paging")
                 licenses {
-                    license { name.set("MIT") }
-                    url.set("https://opensource.org/licenses/MIT")
+                    license {
+                        name.set("MIT license")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
                 }
-                url.set("https://www.github.com/Kashif-E/Simple-Paging.git")
                 issueManagement {
-                    system.set("GitHub")
+                    system.set("Github")
                     url.set("https://www.github.com/Kashif-E/Simple-Paging/issues")
                 }
                 scm {
-                    connection.set("https://github.com/Kashif-E/Simple-Paging.git")
-                    developerConnection.set("https://github.com/Kashif-E")
-                    url.set("https://github.com/Kashif-E/Simple-Paging")
+                    connection.set("https://www.github.com/Kashif-E/Simple-Paging.git")
+                    url.set("https://www.github.com/Kashif-E/Simple-Paging")
                 }
-
                 developers {
                     developer {
-                        id.set("Kashif-E")
                         name.set("Kashif Mehmood")
                         email.set("kashismails@gmail.com")
                     }
                 }
-                artifact(javaDocJar)
 
-                signing{
-                    useInMemoryPgpKeys(
-                        System.getenv("GPG_PUBLIC_KEY"),
-                        System.getenv("GPG_KEY_PASSWORD")
-                    )
-                    sign("simple_paging")
-                }
             }
         }
     }
 }
 
-android {
-    namespace = "io.github.kashif-e"
-    compileSdk = 33
-    defaultConfig {
-        minSdk = 24
-        targetSdk = 33
-    }
+signing {
+    useGpgCmd()
+    val signingKey: String =
+        properties.getProperty("GPG_SIGNING_KEY").toString()
+            ?: error("Missing env variable: GPG_KEY")
+    val signingPassword: String =
+        System.getenv("GPG_KEY_PASSWORD") ?: error("Missing env variable: GPG_KEY_PASSWORD")
+    logger.info("signingKey: $signingKey")
+    logger.info("signingPassword: $signingPassword")
+    useInMemoryPgpKeys(
+        signingKey,
+        signingPassword
+    )
+    sign(publishing.publications)
 }
